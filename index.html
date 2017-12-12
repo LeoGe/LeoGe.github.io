@@ -108,16 +108,13 @@ function create_table() {
 	body.appendChild(tbl);
 	tbl.onmousedown = function(e) {mousedown(e)};
 	tbl.onmouseup = function(e) {mouseup(e)};
-/*
-    setInterval(function() {
-        do_bot();
-        draw();
-    }, 1000);*/
 
-    //for(var i = 0; i < 3; i++) {
+    // run bot (if checkbox checked)
     setInterval(function() {
-        if(do_bot())
-            draw();
+        if(document.getElementById("bot").checked){
+            if(do_bot())
+                draw();
+        }
     }, 1000);
 }
 
@@ -320,8 +317,8 @@ function draw(){
     var overhang = nr_all_elm - (Math.floor(nr_all_elm/nr_cols)*nr_cols);
     var nr_rows = Math.ceil(nr_all_elm/nr_cols);
     var last_row = tbl.rows[nr_rows-1];
-    console.log("debug: number of rows: "+nr_rows+" overhang: "+overhang);
-    console.log(last_row.innerHTML);
+    //console.log("debug: number of rows: "+nr_rows+" overhang: "+overhang);
+    //console.log(last_row.innerHTML);
 
     if(overhang!=0){
         for(var j=overhang;j<nr_cols;j++){
@@ -391,8 +388,6 @@ function position_to_index(x, y){
 }
 
 function write_number(col, row, num) {
-    console.log("Write number " + col + "|" + row + " : " + num);
-
 	var r = tbl.getElementsByTagName("td")[row*nr_cols+col];
 	r.innerHTML = "<b>"+num+"</b>";
 	switch(num) {
@@ -425,7 +420,7 @@ function write_number(col, row, num) {
 }
 
 function do_move(col1, row1, col2, row2) {
-    console.log("DO MOVE: " + col1 + "|" + row1 + " AND " + col2 + "|" + row2);
+    //console.log("DO MOVE: " + col1 + "|" + row1 + " AND " + col2 + "|" + row2);
 
 	valid_move(row1*nr_cols+col1,row2*nr_cols+col2);
     tetris_mode();
@@ -443,22 +438,9 @@ function do_move(col1, row1, col2, row2) {
 function make_move(col, row, nr_rows, nr_cols_last) {
     var own_num = get_number(col, row);
 
-    // check bottom
-    if(nr_cols_last < (col+1))
-        var nr_rows_own = nr_rows-1;
-    else
-        var nr_rows_own = nr_rows;
+    if(own_num == 0)
+        return true;
 
-    for(var i = row+1; i < nr_rows_own; i++) {
-        var num = get_number(col, i);
-        if(num != 0)
-            if ((num+own_num) == 10 || (num == own_num)) {
-                do_move(col, row, col, i);
-                return false;
-            } else {
-                break;
-            }
-    }
     // check top
     for(var i = row-1; i > 0; i--) {
         var num = get_number(col, i);
@@ -471,7 +453,7 @@ function make_move(col, row, nr_rows, nr_cols_last) {
             }
     }
 
-    // check left
+    // check right
     loop2:
     for(var j = row; j < nr_rows; j++) {
         if(j==row)
@@ -479,7 +461,7 @@ function make_move(col, row, nr_rows, nr_cols_last) {
         else
             var i = 0;
 
-        if(row==(nr_rows-1))
+        if(j==(nr_rows-1))
             var nr_cols_own = nr_cols_last;
         else
             var nr_cols_own = nr_cols;
@@ -497,15 +479,15 @@ function make_move(col, row, nr_rows, nr_cols_last) {
             }
         }
     }
-    // check right
+    // check left
     loop2:
     for(var j = row; j > 0; j--) {
         if(j==row)
             var i = col-1;
         else
-            var i = nr_cols;
+            var i = nr_cols-1;
 
-        for(; i > 0; i--) {
+        for(; i >= 0; i--) {
             var num = get_number(i, j);
             if(num != 0) {
                 if ((num+own_num) == 10 || (num == own_num)) {
@@ -517,6 +499,22 @@ function make_move(col, row, nr_rows, nr_cols_last) {
 
             }
         }
+    }
+    // check bottom
+    if(nr_cols_last < (col+1))
+        var nr_rows_own = nr_rows-1;
+    else
+        var nr_rows_own = nr_rows;
+
+    for(var i = row+1; i < nr_rows_own; i++) {
+        var num = get_number(col, i);
+        if(num != 0)
+            if ((num+own_num) == 10 || (num == own_num)) {
+                do_move(col, row, col, i);
+                return false;
+            } else {
+                break;
+            }
     }
 
     return true;
@@ -565,6 +563,12 @@ Tetris Mode
     <span class = "slider"></span>
 </label>
     Random Start
+
+<label class="switch">
+    <input id="bot" type="checkbox">
+    <span class = "slider"></span>
+</label>
+    Use bot
 
 </div>
 </body>
