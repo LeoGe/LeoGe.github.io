@@ -1,0 +1,429 @@
+<html>
+<head>
+<style>
+.text{
+background-color:white;
+color:black;
+border: 1px solid #ffffff;
+margin-bottom: 10px;
+}
+
+.game_table {
+color: black;
+	-moz-user-select: none; -webkit-user-select: none; -ms-user-select:none; user-select:none;-o-user-select:none;
+}
+
+.game_table tr, td {
+color: black;
+border: 2px solid black;
+padding: 15px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  top: 10px;
+}
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+</style>
+<script>
+var color19 = "#5c6941";
+var color28 = "#ff5607";
+var color37 = "#8a828a";
+var color46 = "#b17d4e";
+var color5 = "#deb25b";
+var tbl;
+var nr_cols = 9;
+function create_table() {
+	var body = document.body;
+	tbl = document.createElement('table');
+	tbl.classList.add('game_table');
+    if(document.getElementById("random").checked){
+	    create_random_table();
+    }else{
+        for(var j = 0; j < 3; j++) {
+		    var row = tbl.insertRow();
+		    for(var i = 0; i < nr_cols; i++){
+			    var cell = row.insertCell();
+		    }
+	    }
+
+	    for(var i = 1; i < 10; i++) { 
+	    write_number(i-1,0, i);
+	    }
+	    for(var i = 0; i < 17; i+=2) {
+	    write_number(i,1,1);
+	    }
+	    var num = 1;
+	    for(var i = 1; i < 18; i+=2) {
+	    write_number(i,1,num);
+	    num ++;
+	    }
+    }
+
+    /*for(var i = 0; i < 81; i++) {
+        write_number(i, 0, 3);
+    }*/
+	body.appendChild(tbl);
+	tbl.onmousedown = function(e) {mousedown(e)};
+	tbl.onmouseup = function(e) {mouseup(e)};
+}
+
+function create_random_table() {
+    for(var j = 0;j<3;j++)  {
+        var row = tbl.insertRow();
+        for(var i = 0;i<nr_cols;i++){
+            var cell = row.insertCell();
+        }
+    }
+
+    for(var j = 0; j<27;j++){
+        number = Math.floor(10*Math.random());
+        //console.log("debug: first throw number: "+number);
+        while(number==0){
+            number = Math.floor(10*Math.random());
+           // console.log("debug: another throw number: "+number);
+        }
+        write_number(j,0,number);
+    }
+
+}
+
+var start_x;
+var start_y;
+function mousedown(e) {
+	start_x = e.clientX;
+	start_y = e.clientY;
+}
+
+function mouseup(e)  {
+	var x = e.clientX;
+	var y = e.clientY;
+	var rect = tbl.getBoundingClientRect();
+
+	var ind1 = position_to_index(start_x, start_y);
+	var ind2 = position_to_index(x,y);
+	if(ind1==-1 || ind2==-1){
+	console.log("mouse click in table but not on a valid field");
+	}else{
+	valid_move(ind1,ind2);
+    tetris_mode();
+
+    var all_empty = true;
+    var nr_elm = tbl.getElementsByTagName("td").length;
+    for(var j = 0; j<nr_elm; j++){
+            all_empty &= (get_number(j,0) == 0);
+    }
+    //console.log("nr of all elements:"+nr_elm);
+    if(all_empty || nr_elm<=1) {
+        alert("SUCESS!");
+    }
+    }
+}
+
+function valid_move(ind1, ind2){
+	row1 = Math.floor(ind1/nr_cols);
+	row2 = Math.floor(ind2/nr_cols);
+	col1 = ind1 - row1 * nr_cols;
+	col2 = ind2 - row2*nr_cols;
+	var num_field1 = get_number(ind1,0);
+	var num_field2 = get_number(ind2,0);
+	//console.log("debug: field1: ["+row1+"|"+col1+"]:"+num_field1+" field2: ["+row2+"|"+col2+"]:"+num_field2);
+	if(num_field1==0 || num_field2==0){
+		console.log("one field is already crossed out");
+		return 0;
+	}
+
+	if(ind1==ind2){
+		console.log("that was the same field");
+		return 0;
+	}
+
+	if(ind1<ind2){ 
+		var pos_small = ind1;
+		var pos_great = ind2;
+        //console.log("debug: first position is smaller the second position");
+	}else{
+		var pos_small = ind2;
+		var pos_great = ind1;
+        //console.log("debug: second position is smaller than first position");
+	}
+
+	var strike_vec = new Array();
+	strike_vec.push(pos_small);
+
+	//case 1 vertical:
+	if(col1 == col2){
+        var row_small = Math.floor(pos_small / nr_cols);
+        var row_great = Math.floor(pos_great / nr_cols);
+        //console.log("debug: the small row is: "+row_small+" the great row is: "+row_great);
+		for(var j = row_small+1; j<row_great; j++){
+			strike_vec.push(j*nr_cols+col1);
+			if(get_number(col1,j)!=0){
+				console.log("You cannot jump over numbers");
+				return 0;
+			}
+		}
+	}
+
+	//case 2 horizontal
+	else{
+		for(var j = pos_small+1; j<pos_great; j++){
+			strike_vec.push(j);
+            //console.log("debug: count index: "+j+" strike ector: "+strike_vec); 
+			if(get_number(j,0)!=0){
+				console.log("You cannot jump over numbers");
+				return 0;
+			}
+		}
+	}
+	strike_vec.push(pos_great);
+	//console.log("debug: strike indexes: "+strike_vec+" start: "+ind1+" end: "+ind2);
+	if(num_field1==num_field2 || (num_field1+num_field2)==10){
+		for(var j=0;j<strike_vec.length;j++){
+			//console.log("debug: strike elm: "+strike_vec[j]+" strike vector length: "+strike_vec.length);
+			strike(strike_vec[j],0);
+		}
+		return 1;
+	}
+	console.log("numbers must be the same or add up to ten")
+}
+
+function strike(col, row){
+    var elm = tbl.getElementsByTagName("td")[row*nr_cols+col];
+    var num = get_number(col, row);
+    elm.innerHTML = "<b>0</b>";
+    switch(num){
+            case 1:
+            case 9:
+                elm.style.backgroundColor = color19;
+                break;
+            case 2:
+            case 8:
+                elm.style.backgroundColor = color28;
+                break;
+            case 3:
+            case 7:
+                elm.style.backgroundColor = color37;
+                break;
+            case 4:
+            case 6:
+                elm.style.backgroundColor = color46;
+                break;
+            case 5:
+                elm.style.backgroundColor = color5;
+                break;
+            default:
+    }
+
+}
+
+function tetris_mode(){
+    if(!(document.getElementById("tetris_mode").checked)){
+        return;
+    }
+    nr_rows = Math.ceil(tbl.getElementsByTagName("td").length/nr_cols);
+    //console.log("debug: nr of all rows "+nr_rows);
+    var delete_rows = new Array();
+    for(var j = 0; j<nr_rows-1; j++){
+        var empty = true;
+
+        for(var i = 0; i<nr_cols;i++){
+            empty &= (get_number(i, j) == 0);
+        }
+
+        if(empty){
+            delete_rows.push(j);
+        }
+    }
+    overhang = nr_cols + (tbl.getElementsByTagName("td").length - (nr_rows * nr_cols));
+    //console.log("debug: overhang: "+overhang);
+    empty = true;
+    for(var j = 0;j<overhang;j++){
+        empty&=(get_number(j,nr_rows-1) ==0);
+    }
+    if(empty){
+        delete_rows.push(nr_rows-1);
+    }
+    if(delete_rows.length!=0){
+        new Audio('tetris.mp3').play();
+        for(var j = delete_rows.length-1; j>=0;j--){
+            tbl.deleteRow(delete_rows[j]);
+        }
+    }
+
+}
+
+function draw(){
+    nr_all_elm = tbl.getElementsByTagName("td").length;
+    copy_elements = new Array();
+    copy_count = 0;
+    for(var j = 0;j<nr_all_elm;j++){
+        var num = get_number(j,0);
+        if(num!=0){
+            copy_elements.push(num);
+        }
+    }
+    console.log("debug: elements to copy:"+copy_elements);
+    var overhang = nr_all_elm - (Math.floor(nr_all_elm/nr_cols)*nr_cols);
+    var nr_rows = Math.ceil(nr_all_elm/nr_cols);
+    var last_row = tbl.rows[nr_rows - 1];
+    console.log("debug: number of rows: "+nr_rows+" overhang: "+overhang);
+    if(overhang!=0){
+        for(var j=overhang;j<nr_cols;j++){
+            if(copy_count<copy_elements.length){
+                last_row.insertCell();
+                write_number(j, nr_rows-1, copy_elements[copy_count]);
+                copy_count++;
+            }else{
+                return;
+            }
+        }
+    }
+    console.log("debug:draw last row");
+    for(var i = 0; i < Math.ceil(copy_elements.length / nr_cols); i++){
+        var row = tbl.insertRow();
+        for(var j=0; j<nr_cols; j++){
+            if(copy_count<copy_elements.length){
+                row.insertCell();
+                write_number(j,i+nr_rows,copy_elements[copy_count]);
+                copy_count++;
+            }else{
+                return;
+            }
+        }
+    }
+
+}
+
+function get_number(col, row){
+	var elm = tbl.getElementsByTagName("td")[row*nr_cols+col];
+	num = parseInt(elm.innerHTML[3]);
+	return num;
+}
+
+function position_to_index(x, y){
+	var rect = tbl.getBoundingClientRect();
+	var height = rect.bottom - rect.top;
+	var width = rect.right - rect.left;
+	
+	var nr_rows = Math.ceil(tbl.getElementsByTagName("td").length / nr_cols);
+	var cell_height = height / nr_rows;
+	var cell_width = width / nr_cols;
+
+	x = x - rect.left;
+	y = y - rect.top;
+
+	var row_ind = Math.floor(y / cell_height);
+	var col_ind = Math.floor(x / cell_width);
+
+	var nr_finished_rows = Math.floor(tbl.getElementsByTagName("td").length/nr_cols);
+	var overhang = tbl.getElementsByTagName("td").length - nr_finished_rows * nr_cols;
+	
+	if(row_ind+1 > nr_finished_rows){
+		if(col_ind >= overhang){
+		return -1;
+		}
+	}
+
+	return col_ind + row_ind*nr_cols;
+}
+
+function write_number(col, row, num) {
+	var r = tbl.getElementsByTagName("td")[row*nr_cols+col];
+	r.innerHTML = "<b>"+num+"</b>";
+	switch(num) {
+	case 1:
+	case 9:
+		r.style.color = color19;
+		r.style.border = "2px solid "+color19;
+		break;
+	case 2:
+	case 8:
+		r.style.color = color28;
+		r.style.border = "2px solid "+color28;
+		break;
+	case 3:
+	case 7:
+		r.style.color = color37;
+		r.style.border = "2px solid "+color37;
+		break;
+	case 4:
+	case 6:
+		r.style.color = color46;
+		r.style.border = "2px solid "+color46;
+		break;
+	case 5:
+		r.style.color = color5;
+		r.style.border = "2px solid "+color5;
+	default:
+
+	}
+}
+
+</script>
+</head>
+<body onload="create_table()">
+<div class="text">
+    <p><b>Tons Spiel!</b></p>
+</div>
+<div class = "text">
+<button onclick="draw()">Draw</button>
+
+<label class="switch">
+  <input id="tetris_mode" type="checkbox">
+  <span class="slider"></span>
+</label>
+Tetris Mode
+
+<label class="switch">
+    <input id="random" type="checkbox">
+    <span class = "slider"></span>
+</label>
+    Random Start
+
+</div>
+</body>
+
+</html>
