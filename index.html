@@ -114,10 +114,11 @@ function create_table() {
         draw();
     }, 1000);*/
 
-    for(var i = 0; i < 4; i++) {
-        do_bot();
-        draw();
-    }
+    //for(var i = 0; i < 3; i++) {
+    setInterval(function() {
+        if(do_bot())
+            draw();
+    }, 1000);
 }
 
 function create_random_table() {
@@ -318,8 +319,10 @@ function draw(){
     console.log("debug: elements to copy:"+copy_elements);
     var overhang = nr_all_elm - (Math.floor(nr_all_elm/nr_cols)*nr_cols);
     var nr_rows = Math.ceil(nr_all_elm/nr_cols);
-    var last_row = tbl.rows[nr_rows - 1];
+    var last_row = tbl.rows[nr_rows-1];
     console.log("debug: number of rows: "+nr_rows+" overhang: "+overhang);
+    console.log(last_row.innerHTML);
+
     if(overhang!=0){
         for(var j=overhang;j<nr_cols;j++){
             if(copy_count<copy_elements.length){
@@ -331,8 +334,14 @@ function draw(){
             }
         }
     }
+
+    console.log("DEBUG: " + copy_count);
+
     console.log("debug:draw last row");
     for(var i = 0; i < Math.ceil(copy_elements.length / nr_cols); i++){
+        if(copy_count>=copy_elements.length)
+            return;
+
         var row = tbl.insertRow();
         for(var j=0; j<nr_cols; j++){
             if(copy_count<copy_elements.length){
@@ -344,6 +353,7 @@ function draw(){
             }
         }
     }
+
 
 }
 
@@ -381,6 +391,8 @@ function position_to_index(x, y){
 }
 
 function write_number(col, row, num) {
+    console.log("Write number " + col + "|" + row + " : " + num);
+
 	var r = tbl.getElementsByTagName("td")[row*nr_cols+col];
 	r.innerHTML = "<b>"+num+"</b>";
 	switch(num) {
@@ -442,7 +454,7 @@ function make_move(col, row, nr_rows, nr_cols_last) {
         if(num != 0)
             if ((num+own_num) == 10 || (num == own_num)) {
                 do_move(col, row, col, i);
-                return;
+                return false;
             } else {
                 break;
             }
@@ -453,7 +465,7 @@ function make_move(col, row, nr_rows, nr_cols_last) {
         if(num != 0)
             if ((num+own_num) == 10 || (num == own_num)) {
                 do_move(col, row, col, i);
-                return;
+                return false;
             } else {
                 break;
             }
@@ -477,7 +489,7 @@ function make_move(col, row, nr_rows, nr_cols_last) {
             if(num != 0) {
                 if ((num+own_num) == 10 || (num == own_num)) {
                     do_move(col, row, i, j);
-                    return;
+                    return false;
                 } else {
                     break loop2;
                 }
@@ -498,7 +510,7 @@ function make_move(col, row, nr_rows, nr_cols_last) {
             if(num != 0) {
                 if ((num+own_num) == 10 || (num == own_num)) {
                     do_move(col, row, i, j);
-                    return;
+                    return false;
                 } else {
                     break loop2;
                 }
@@ -506,6 +518,8 @@ function make_move(col, row, nr_rows, nr_cols_last) {
             }
         }
     }
+
+    return true;
 }
 
 function do_bot() {
@@ -515,14 +529,18 @@ function do_bot() {
     if(nr_cols_last == 0)
         nr_cols_last = nr_cols;
 
+    var tmp = true;
+
     for(var i = 0; i < nr_rows-1; i++)
         for(var j = 0; j < nr_cols; j++) {
-            make_move(j, i, nr_rows, nr_cols_last);
+            tmp &= make_move(j, i, nr_rows, nr_cols_last);
         }
 
     for(var j = 0; j < nr_cols_last; j++) {
-            make_move(j, i, nr_rows, nr_cols_last);
+            tmp &= make_move(j, i, nr_rows, nr_cols_last);
     }
+
+    return tmp;
 
 }
 
