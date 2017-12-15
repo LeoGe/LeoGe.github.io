@@ -151,6 +151,7 @@ function touchmove(e){
     alert("startx: "+start_x+" starty: "+starty);
     mouseup(touches[touches.length-1]);
     //e.preventDefault();
+    e.stopPropagation();
 }
 
 /*function touchstart(e){
