@@ -149,7 +149,7 @@ function touchmove(e){
     console.log("touchmove event");
     start_x = touches[0].clientX;
     start_y = touches[0].clientY;
-    console.log("startx: "+start_x+" starty: "+starty);
+    alert("startx: "+start_x+" starty: "+starty);
     mouseup(touches[touches.length-1]);
 }
 
@@ -171,7 +171,7 @@ function mousedown(e) {
 function mouseup(e)  {
 	var x = e.clientX;
 	var y = e.clientY;
-    console.log("debug: x: "+x+" y: "+y);
+    alert("debug: x: "+x+" y: "+y);
 	var rect = tbl.getBoundingClientRect();
 
 	var ind1 = position_to_index(start_x, start_y);
