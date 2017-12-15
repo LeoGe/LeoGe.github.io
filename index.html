@@ -159,12 +159,17 @@ function touchstart(e){
 
     e.preventDefault();
 
+    e.clientX = e.pageX;
+    e.clientY = e.pageY;
+
     console.log("debug: touchstart event");
     mousedown(e);
 }
 
 function touchend(e){
     //alert("End");
+    e.clientX = e.pageX;
+    e.clientY = e.pageY;
 
     console.log("debug: touchend event");
     mouseup(e);
