@@ -146,8 +146,10 @@ var start_y;
 function touchmove(e){
     e.preventDefault();
     touches = e.touches;
+    console.log("touchmove event");
     start_x = touches[0].clientX;
     start_y = touches[0].clientY;
+    console.log("startx: "+start_x+" starty: "+starty);
     mouseup(touches[touches.length-1]);
 }
 
