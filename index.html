@@ -155,7 +155,7 @@ function touchmove(e){
 }
 
 function touchstart(e){
-    alert("Start");
+    //alert("Start");
 
     e.preventDefault();
 
@@ -164,9 +164,10 @@ function touchstart(e){
 }
 
 function touchend(e){
-    alert("End");
+    //alert("End");
 
     console.log("debug: touchend event");
+    mouseup(e);
 }
 
 function mousedown(e) {
