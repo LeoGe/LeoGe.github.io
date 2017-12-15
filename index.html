@@ -109,8 +109,7 @@ function create_table() {
 	body.appendChild(tbl);
 	tbl.onmousedown = function(e) {mousedown(e)};
 	tbl.onmouseup = function(e) {mouseup(e)};
-    tbl.ontouchstart = function(e) {touchstart(e)};
-    tbl.ontouchend = function(e) {touchend(e)};
+    tbl.ontouchmove = function(e) {touchmove(e)};
     // run bot (if checkbox checked)
     setInterval(function() {
         if(document.getElementById("bot").checked){
@@ -149,17 +148,8 @@ function create_random_table() {
 
 var start_x;
 var start_y;
-function touchstart(e) {
+function touchmove(e){
     e.preventDefault();
-    alert("touchstart!");
-    console.log("debug: reached a touchstart event");
-    mousedown(e);
-}
-
-function touchend(e) {
-    e.preventDefault();
-    console.log("debug: reached a touchend event");
-    mouseup(e);
 }
 
 function mousedown(e) {
