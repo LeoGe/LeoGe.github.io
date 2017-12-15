@@ -110,6 +110,8 @@ function create_table() {
 	tbl.onmousedown = function(e) {mousedown(e)};
 	tbl.onmouseup = function(e) {mouseup(e)};
     tbl.ontouchmove = function(e) {touchmove(e)};
+    tbl.ontouchstart = function(e) {touchstart(e)};
+    tbl.ontouchend = function(e) {touchend(e)};
     // run bot (if checkbox checked)
     setInterval(function() {
         if(document.getElementById("bot").checked){
@@ -152,14 +154,25 @@ function touchmove(e){
     e.preventDefault();
 }
 
+function touchstart(e){
+    console.log("debug: touchstart event");
+    mousedown(e);
+}
+
+function touchend(e){
+    console.log("debug: touchend event");
+}
+
 function mousedown(e) {
 	start_x = e.clientX;
 	start_y = e.clientY;
+    console.log("debug: startx: "+start_x+" starty: "+start_y);
 }
 
 function mouseup(e)  {
 	var x = e.clientX;
 	var y = e.clientY;
+    console.log("debug: x: "+x+" y: "+y);
 	var rect = tbl.getBoundingClientRect();
 
 	var ind1 = position_to_index(start_x, start_y);
