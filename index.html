@@ -110,8 +110,8 @@ function create_table() {
 	tbl.onmousedown = function(e) {mousedown(e)};
 	tbl.onmouseup = function(e) {mouseup(e)};
     tbl.ontouchmove = function(e) {touchmove(e)};
-   // tbl.ontouchstart = function(e) {touchstart(e)};
-   // tbl.ontouchend = function(e) {touchend(e)};
+    tbl.ontouchstart = function(e) {touchstart(e)};
+    tbl.ontouchend = function(e) {touchend(e)};
     // run bot (if checkbox checked)
     setInterval(function() {
         if(document.getElementById("bot").checked){
@@ -144,24 +144,30 @@ function create_random_table() {
 var start_x;
 var start_y;
 function touchmove(e){
-    touches = e.touches;
-    e.preventDefault();
-    console.log("touchmove event");
+    /*touches = e.touches;
+    colsole.log("touchmove event");
     start_x = touches[0].clientX;
     start_y = touches[0].clientY;
     alert("startx: "+start_x+" starty: "+starty);
-    mouseup(touches[touches.length-1]);
+    mouseup(touches[touches.length-1]);*/
+    e.preventDefault();
     //e.stopPropagation();
 }
 
-/*function touchstart(e){
+function touchstart(e){
+    alert("Start");
+
+    e.preventDefault();
+
     console.log("debug: touchstart event");
     mousedown(e);
 }
 
 function touchend(e){
+    alert("End");
+
     console.log("debug: touchend event");
-}*/
+}
 
 function mousedown(e) {
 	start_x = e.clientX;
