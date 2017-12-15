@@ -145,7 +145,10 @@ var start_x;
 var start_y;
 function touchmove(e){
     e.preventDefault();
-    alert(e.touches);
+    touches = e.touches;
+    start_x = touches[0].clientX;
+    start_y = touches[0].clientY;
+    mouseup(touches[touches.length-1]);
 }
 
 /*function touchstart(e){
